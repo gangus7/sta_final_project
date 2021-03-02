@@ -178,6 +178,130 @@ scot_demo %>%
 # What type of locations receive the most visits? What kinds of locations do people spend the most in?
 
 ```{r}
+scot_loca <- scot_loca %>%
+  select(-c(feature_code, measurement, breakdown_of_domestic_tourism))
 
+scot_loca <- scot_loca %>%
+  pivot_wider(names_from = units, values_from = value)
+```
+
+# revenue by location
+
+```{r}
+scot_loca %>%
+  filter(date_code == "2019" & type_of_location_visited != "All areas") %>%
+  group_by(type_of_location_visited) %>%
+  summarise(revenue = million_pounds_gbp) %>%
+  ggplot() +
+   geom_col(aes(x = type_of_location_visited, y = revenue))
+```
+
+# visits by location
+
+```{r}
+scot_loca %>%
+  filter(date_code == "2019" & type_of_location_visited != "All areas") %>%
+  group_by(type_of_location_visited) %>%
+  summarise(visits = million_visits) %>%
+  ggplot() +
+   geom_col(aes(x = type_of_location_visited, y = visits))
+```
+# spend per visit per location
+
+```{r}
+scot_loca %>%
+  filter(type_of_location_visited != "All areas") %>%
+  mutate(spend_per_visit = million_pounds_gbp/million_visits) %>%
+  arrange(desc(spend_per_visit))
+```
+
+# Is there a particular method of travel our visitors arrive by? Some of our locations are remote and not easily accessible by public transport, so this would be good information to have.
+
+```{r}
+scot_tran <- scot_tran %>%
+  select(-c(feature_code, measurement, breakdown_of_domestic_tourism))
+
+scot_tran <- scot_tran %>%
+  pivot_wider(names_from = units, values_from = value)
+```
+
+# spend by method of travel
+
+```{r}
+scot_tran %>%
+  filter(date_code == "2019" & method_of_travel != "All") %>%
+  group_by(method_of_travel) %>%
+  summarise(revenue = million_pounds_gbp) %>%
+  ggplot() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+   geom_col(aes(x = method_of_travel, y = revenue)) +
+  scale_x_discrete(labels = c("Bike", "Boat/Ship/Ferry", "Organised Tour", "Regular Bus", "Car Hired", "Car Owned", "Caravan/Campervan", "Lorry/Truck/Van", "Other", "Plane", "Taxi", "Train", "Tram", "Tube", "Walked"))
+```
+# Spend per visit by transport method
+```{r}
+scot_tran %>%
+  mutate(spend_per_visit = million_pounds_gbp/million_visits) %>%
+  arrange(desc(spend_per_visit))
+```
+# visits by method of travel
+
+```{r}
+scot_tran %>%
+  filter(date_code == "2019" & method_of_travel != "All") %>%
+  group_by(method_of_travel) %>%
+  summarise(visits = million_visits) %>%
+  ggplot() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+   geom_col(aes(x = method_of_travel, y = visits)) +
+  scale_x_discrete(labels = c("Bike", "Boat/Ship/Ferry", "Organised Tour", "Regular Bus", "Car Hired", "Car Owned", "Caravan/Campervan", "Lorry/Truck/Van", "Other", "Plane", "Taxi", "Train", "Tram", "Tube", "Walked"))
+```
+
+# When looking at regional tourism, what insights can we gain? Where are our visitors from? How do they differ in the money they spend, nights they spend in Scotland, or number of visits they do?
+
+
+```{r}
+dom_tour %>%
+  filter(region_of_residence != "All of GB") %>%
+  ggplot() +
+   geom_col(aes(x = date_code, y = million_pounds_gbp, fill = region_of_residence)) 
+
+```
+
+
+```{r}
+dom_tour %>%
+  filter(region_of_residence != "All of GB") %>%
+  ggplot() +
+   geom_col(aes(x = date_code, y = thousand_nights, fill = region_of_residence))
+  
+```
+
+```{r}
+dom_tour %>%
+  filter(region_of_residence != "All of GB") %>%
+  ggplot() +
+   geom_col(aes(x = date_code, y = thousand_visits, fill = region_of_residence))
+```
+# Highest spending region
+```{r}
+dom_tour %>%
+  filter(region_of_residence != "All of GB") %>%
+  arrange(desc(million_pounds_gbp))
+```
+
+# Highest number of nights
+
+```{r}
+dom_tour %>%
+  filter(region_of_residence != "All of GB") %>%
+  arrange(desc(thousand_nights))
+```
+
+# Spend per region
+
+```{r}
+dom_tour %>%
+  filter(region_of_residence == "England" & date_code == "2015-2017") %>%
+  sum(million_pounds_gbp)
 ```
 
