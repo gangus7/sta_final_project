@@ -61,12 +61,123 @@ scot_activ %>%
 
 ```{r}
 scot_activ %>%
-  filter(date_code == "2014") %>%
+  filter(date_code == "2019" & tourism_activity != "All") %>%
   group_by(tourism_activity) %>%
   summarise(revenue = million_pounds_gbp) %>%
   ggplot() +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
   geom_col(aes(x = tourism_activity, y = revenue)) +
   scale_x_discrete(labels = c("All", "Spa Day", "Day Trip", "Entertainment", "Exploring", "Leisure Activities", "Night Out", "Outdoor Leisure", "Shopping", "Personal Events", "Public Events", "Sport Participation", "Visiting friends or family", "Visitor Attraction", "Live Sport", "Out for a meal"))
+```
+# Which kind of activity generates the most visits to sites?
+
+```{r}
+scot_activ %>%
+  filter(date_code == "2019" & tourism_activity != "All") %>%
+  group_by(tourism_activity) %>%
+  summarise(visits = million_visits) %>%
+  ggplot() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  geom_col(aes(x = tourism_activity, y = visits)) +
+  scale_x_discrete(labels = c("All", "Spa Day", "Day Trip", "Entertainment", "Exploring", "Leisure Activities", "Night Out", "Outdoor Leisure", "Shopping", "Personal Events", "Public Events", "Sport Participation", "Visiting friends or family", "Visitor Attraction", "Live Sport", "Out for a meal"))
+```
+
+# Is there a particular key demographic of visitors we should be focusing on? Who spends the most? Who visits the most?
+
+```{r}
+scot_demo <- scot_demo %>%
+  select(-c(feature_code, measurement, breakdown_of_domestic_tourism))
+
+scot_demo <- scot_demo %>%
+  pivot_wider(names_from = units, values_from = value)
+
+```
+
+# Age category spends
+
+```{r}
+scot_demo %>%
+  filter(date_code == "2019" & age != "All") %>%
+  group_by(age) %>%
+  summarise(revenue = million_pounds_gbp) %>%
+  ggplot() +
+   geom_col(aes(x = age, y = revenue))
+```
+# Social status spends
+
+
+```{r}
+scot_demo %>%
+  filter(date_code == "2019" & social_grade != "All") %>%
+  group_by(social_grade) %>%
+  summarise(revenue = million_pounds_gbp) %>%
+  ggplot() +
+   geom_col(aes(x = social_grade, y = revenue))
+```
+
+# Employment status spends
+
+```{r}
+scot_demo %>%
+  filter(date_code == "2019" & employment_status != "All") %>%
+  group_by(employment_status) %>%
+  summarise(revenue = million_pounds_gbp) %>%
+  ggplot() +
+   geom_col(aes(x = employment_status, y = revenue))
+```
+
+# Child status
+
+```{r}
+scot_demo %>%
+  filter(date_code == "2019" & children != "All") %>%
+  group_by(children) %>%
+  summarise(revenue = million_pounds_gbp) %>%
+  ggplot() +
+   geom_col(aes(x = children, y = revenue))
+```
+
+# Access to car
+
+```{r}
+scot_demo %>%
+  filter(date_code == "2019" & access_to_car != "All") %>%
+  group_by(access_to_car) %>%
+  summarise(revenue = million_pounds_gbp) %>%
+  ggplot() +
+   geom_col(aes(x = access_to_car, y = revenue))
+```
+
+# 35-44 year olds seem to have the highest spend
+
+```{r}
+scot_demo %>%
+  mutate(spend_per_visit = million_pounds_gbp/million_visits) %>%
+  arrange(desc(spend_per_visit))
+```
+
+# Families with children seem to have a much higher spend than non 
+
+```{r}
+scot_demo %>%
+  mutate(spend_per_visit = million_pounds_gbp/million_visits) %>%
+  filter(children != "All") %>%
+  arrange(desc(spend_per_visit))
+```
+
+# Find out which group has the most visits
+
+16-24 years and then 25-34 years have most visits
+
+```{r}
+scot_demo %>%
+  filter(age != "All") %>%
+  arrange(desc(million_visits))
+```
+
+# What type of locations receive the most visits? What kinds of locations do people spend the most in?
+
+```{r}
+
 ```
 
