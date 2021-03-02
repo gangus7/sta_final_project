@@ -1,0 +1,72 @@
+---
+title: "STA Final Project"
+output: html_notebook
+---
+```{r}
+library(tidyverse)
+library(janitor)
+dom_tour <- read_csv("data/regional_domestic_tourism.csv")
+scot_accom <- read_csv("data/scottish_accomodation_occupancy.csv")
+scot_activ <- read_csv("data/tourism_day_visits_activities.csv")
+scot_demo <- read_csv("data/tourism_day_visits_demographics.csv")
+scot_loca <- read_csv("data/tourism_day_visits_location.csv")
+scot_tran <- read_csv("data/tourism_day_visits_transport.csv")
+
+```
+
+
+```{r}
+dom_tour <- dom_tour %>%
+  clean_names()
+
+scot_accom <- scot_accom %>%
+  clean_names()
+
+scot_activ <- scot_activ %>%
+  clean_names()
+
+scot_demo <- scot_demo %>%
+  clean_names()
+
+scot_loca <- scot_loca %>%
+  clean_names()
+
+scot_tran <- scot_tran %>%
+  clean_names()
+```
+
+# Cleaning the activity dataset
+
+```{r}
+scot_activ <- scot_activ %>%
+  pivot_wider(names_from = units, values_from = value)
+
+scot_activ <- scot_activ %>%
+  select(-c(feature_code, measurement, breakdown_of_domestic_tourism))
+  
+```
+
+# Revenue change over the years
+
+```{r}
+scot_activ %>%
+  filter(tourism_activity == "All") %>%
+  group_by(date_code) %>%
+  summarise(revenue = million_pounds_gbp) %>%
+  ggplot() +
+  geom_col(aes(x = date_code, y = revenue))
+```
+
+# What kind of tourism activity generates the highest income for Scotland?
+
+```{r}
+scot_activ %>%
+  filter(date_code == "2014") %>%
+  group_by(tourism_activity) %>%
+  summarise(revenue = million_pounds_gbp) %>%
+  ggplot() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  geom_col(aes(x = tourism_activity, y = revenue)) +
+  scale_x_discrete(labels = c("All", "Spa Day", "Day Trip", "Entertainment", "Exploring", "Leisure Activities", "Night Out", "Outdoor Leisure", "Shopping", "Personal Events", "Public Events", "Sport Participation", "Visiting friends or family", "Visitor Attraction", "Live Sport", "Out for a meal"))
+```
+
