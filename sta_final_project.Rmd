@@ -54,8 +54,22 @@ scot_activ %>%
   group_by(date_code) %>%
   summarise(revenue = million_pounds_gbp) %>%
   ggplot() +
-  geom_col(aes(x = date_code, y = revenue))
+  geom_col(aes(x = date_code, y = revenue), size = 1, color = "darkblue", fill = "white") +
+  scale_y_continuous(sec.axis = sec_axis(~./100))
 ```
+
+# Visits Trend
+
+```{r}
+ggplot(scot_activ, aes(x = date_code)) +
+  geom_col(aes(y = million_visits), size = 1, fill = "dark blue") 
+  
+```
+
+
+
+
+
 
 # What kind of tourism activity generates the highest income for Scotland?
 
@@ -303,5 +317,52 @@ dom_tour %>%
 dom_tour %>%
   filter(region_of_residence == "England" & date_code == "2015-2017") %>%
   sum(million_pounds_gbp)
+```
+
+# What type of accomodation is most popular? Is there a difference by location?
+
+```{r}
+scot_accom <- scot_accom %>%
+  select(-c(feature_code, measurement, units))
+```
+
+
+```{r}
+scot_accom %>%
+  arrange(desc(value))
+```
+
+```{r}
+scot_accom %>%
+  filter(location != "All") %>%
+  arrange(desc(value))
+```
+
+# Is there any way to predict spending and visits for Visit Scotland?
+
+
+```{r}
+library(tidyverse)
+library(fable)
+library(tsibble)
+library(tsibbledata)
+library(ggfortify)
+library(ggplot2)
+```
+
+```{r}
+forecast_tib <- as_tibble(forecast)
+class(forecast_tib)
+
+forecast_tib <- scot_activ %>%
+  select(date_code, million_pounds_gbp)
+```
+
+```{r}
+autoplot(as.ts(forecast_tib))
+```
+
+```{r}
+
 ```
 
