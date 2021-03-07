@@ -348,6 +348,8 @@ library(tsibble)
 library(tsibbledata)
 library(ggfortify)
 library(ggplot2)
+library(urca)
+library(fpp2)
 ```
 
 ```{r}
@@ -363,6 +365,62 @@ autoplot(as.ts(forecast_tib))
 ```
 
 ```{r}
+glimpse(scot_activ)
+```
 
+# Splitting datset to date and revenue
+
+```{r}
+ts_data <- scot_activ %>%
+  filter(tourism_activity == "All") %>%
+  select(date_code, million_pounds_gbp)
+
+ts_data_nas <- na.omit(ts_data)
+
+y <- ts(ts_data_nas[,2],start=c(2013),frequency = 1)
+```
+
+# Preliminary Analysis - Time Plot
+
+```{r}
+autoplot(y) 
+
+
+```
+
+```{r}
+fit <- snaive(y)
+print(summary(fit))
+checkresiduals(fit)
+```
+
+```{r}
+forecast_1 <- fit %>%
+  fabletools::forecast(h = 1)
+forecast_1
+```
+
+```{r}
+forecast_1 %>%
+  autoplot(y) 
+  library(RColorBrewer)
+```
+
+
+```{r}
+scot_activ %>%
+   filter(tourism_activity == "All") %>%
+  ggplot() +
+geom_col(aes(x= date_code, y = million_pounds_gbp)) +
+  labs(
+    x = "Year",
+    y = "Million Pounds Revenue",
+    title = "Scottish Tourism Activity Revenue 2013 - 2019"
+  )
+```
+
+```{r}
+scot_activ %>%
+  filter(date_code == "2013" & tourism_activity == "All")
 ```
 
