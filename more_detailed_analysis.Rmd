@@ -7,7 +7,7 @@ output: html_notebook
 scot_activ %>%
    filter(tourism_activity == "All") %>%
   ggplot() +
-geom_col(aes(x= date_code, y = million_pounds_gbp)) +
+geom_col(aes(x= date_code, y = million_pounds_gbp, fill = date_code)) +
   labs(
     x = "Year",
     y = "Million Pounds Revenue",
@@ -34,7 +34,11 @@ scot_tran %>%
   summarise(visits = million_visits) %>%
   ggplot() +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
-   geom_col(aes(x = method_of_travel, y = visits)) +
+   geom_col(aes(x = method_of_travel, y = visits, fill = method_of_travel)) +
+    ggtitle("Scottish Transport Methods 2019") +
+  ylab("Visits/Million") +
+  xlab("Method of Travel") +
+  scale_y_continuous(breaks = c(5, 10, 15, 20)) +
   scale_x_discrete(labels = c("Bike", "Boat/Ship/Ferry", "Organised Tour", "Regular Bus", "Car Hired", "Caravan/Campervan", "Lorry/Truck/Van", "Other", "Plane", "Taxi", "Train", "Tram", "Tube", "Walked"))
 ```
 
@@ -46,7 +50,11 @@ scot_tran %>%
   summarise(visits = million_visits) %>%
   ggplot() +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
-   geom_col(aes(x = method_of_travel, y = visits)) +
+   geom_col(aes(x = method_of_travel, y = visits, fill = method_of_travel)) +
+  ggtitle("Scottish Transport Methods 2013") +
+  ylab("Visits/Million") +
+  xlab("Method of Travel") +
+  scale_y_continuous(breaks = c(5, 10, 15, 20)) +
   scale_x_discrete(labels = c("Bike", "Boat/Ship/Ferry", "Organised Tour", "Regular Bus", "Car Hired", "Caravan/Campervan", "Lorry/Truck/Van", "Other", "Plane", "Taxi", "Train", "Tram", "Tube", "Walked")) 
 ```
 
@@ -59,8 +67,12 @@ scot_tran %>%
   summarise(revenue = million_pounds_gbp) %>%
   ggplot() +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
-   geom_col(aes(x = method_of_travel, y = revenue)) +
-   scale_y_continuous(breaks = c(200, 400, 600, 800)) +
+   geom_col(aes(x = method_of_travel, y = revenue, fill = method_of_travel)) +
+    ggtitle("Scottish Transport Methods 2013") +
+  ylab("Revenue £m") +
+  xlab("Method of Travel") +
+    scale_y_continuous(breaks = c(200, 400, 600, 800)) +
+  theme(legend.position='none') +
   scale_x_discrete(labels = c("Bike", "Boat/Ship/Ferry", "Organised Tour", "Regular Bus", "Car Hired", "Caravan/Campervan", "Lorry/Truck/Van", "Other", "Plane", "Taxi", "Train", "Tram", "Tube", "Walked")) 
 ```
 
@@ -71,13 +83,17 @@ scot_tran %>%
   summarise(revenue = million_pounds_gbp) %>%
   ggplot() +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
-   geom_col(aes(x = method_of_travel, y = revenue)) +
+   geom_col(aes(x = method_of_travel, y = revenue, fill = method_of_travel)) +
+    ggtitle("Scottish Transport Methods 2019") +
+   ylab("Revenue £m") +
+  xlab("Method of Travel") +
   scale_y_continuous(breaks = c(200, 400, 600, 800)) +
+  theme(legend.position='none') +
   scale_x_discrete(labels = c("Bike", "Boat/Ship/Ferry", "Organised Tour", "Regular Bus", "Car Hired", "Caravan/Campervan", "Lorry/Truck/Van", "Other", "Plane", "Taxi", "Train", "Tram", "Tube", "Walked"))
 ```
 ```{r}
 scot_tran %>%
-  filter(date_code == "2019")
+  filter(date_code == "2013")
 ```
  # Model building
  
@@ -89,8 +105,8 @@ library(modelr)
 # visualisation packages
 library(GGally)
 
-scot_tran %>%
-  filter(method_of_travel != "All" & method_of_travel != "Other" & method_of_travel != "Lorry/Truck/Van") %>%
+scot_demo %>%
+   filter(method_of_travel != "All" & method_of_travel != "Other" & method_of_travel != "Lorry/Truck/Van") %>%
   ggpairs()
 
 mod1a <- lm(million_pounds_gbp ~ million_visits, data = scot_tran)
@@ -106,5 +122,112 @@ summary(mod1a)
 ```{r}
 par(mfrow = c(2, 2))
 plot(mod1a)
+```
+
+# A model for demographics 
+
+```{r}
+scot_demo %>%
+  select(- million_visits) %>%
+  ggpairs()
+```
+
+# Build a model 
+
+```{r}
+mod2a <- lm(million_pounds_gbp ~ age + access_to_car + social_grade + employment_status, data = scot_demo)
+mod2a
+```
+ # age + access_to_car + social_grade + 
+    employment_status has a 0.73 predictor of 
+```{r}
+summary(mod2a)
+```
+
+```{r}
+par(mfrow = c(2, 2))
+plot(mod2a)
+```
+
+# What kind of activity generates the most visits to sites?
+
+```{r}
+scot_activ %>%
+  filter(date_code == "2019" & tourism_activity != "All") %>%
+  group_by(tourism_activity) %>%
+  summarise(visits = million_visits) %>%
+  ggplot() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  geom_col(aes(x = tourism_activity, y = visits, fill = tourism_activity)) +
+   ggtitle("Scottish Tourist Activity Visits 2019") +
+   ylab("Visits/million") +
+  xlab("Tourist Activities") +
+  theme(legend.position='none') +
+  scale_x_discrete(labels = c("Spa Day", "Day Trip", "Entertainment", "Exploring", "Leisure Activities", "Night Out", "Outdoor Leisure", "Shopping", "Personal Events", "Public Events", "Sport Participation", "Visiting friends or family", "Visitor Attraction", "Live Sport", "Out for a meal"))
+```
+
+```{r}
+scot_activ %>%
+  filter(date_code == "2013" & tourism_activity != "All") %>%
+  group_by(tourism_activity) %>%
+  summarise(visits = million_visits) %>%
+  ggplot() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  geom_col(aes(x = tourism_activity, y = visits)) +
+  scale_x_discrete(labels = c("Spa Day", "Day Trip", "Entertainment", "Exploring", "Leisure Activities", "Night Out", "Outdoor Leisure", "Shopping", "Personal Events", "Public Events", "Sport Participation", "Visiting friends or family", "Visitor Attraction", "Live Sport", "Out for a meal"))
+```
+
+```{r}
+scot_activ %>%
+  filter(date_code == "2019")
+```
+
+```{r}
+scot_activ %>%
+  filter(date_code == "2013")
+```
+
+```{r}
+scot_activ %>%
+  filter(date_code == "2019" & tourism_activity != "All") %>%
+  group_by(tourism_activity) %>%
+  summarise(revenue = million_pounds_gbp) %>%
+  ggplot() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  geom_col(aes(x = tourism_activity, y = revenue, fill = tourism_activity)) +
+   ggtitle("Scottish Tourist Activity Revenue 2019") +
+   ylab("Revenue per Million") +
+  xlab("Tourist Activities") +
+  theme(legend.position='none') +
+  scale_x_discrete(labels = c("Spa Day", "Day Trip", "Entertainment", "Exploring", "Leisure Activities", "Night Out", "Outdoor Leisure", "Shopping", "Personal Events", "Public Events", "Sport Participation", "Visiting friends or family", "Visitor Attraction", "Live Sport", "Out for a meal"))
+```
+
+```{r}
+scot_loca %>%
+  filter(date_code == "2019" & type_of_location_visited != "All areas") %>%
+  group_by(type_of_location_visited) %>%
+  summarise(visits = million_visits) %>%
+  ggplot() +
+  scale_x_discrete(labels = c("City", "Rural", "Seaside - Beach", "Seaside - other", "Seaside - Resort", "Town", "Village")) +
+  theme(legend.position='none') +
+  ggtitle("Scottish Tourist Locations 2019") +
+   ylab("Visits per Million") +
+  xlab("Type of Locations Visited") +
+   geom_col(aes(x = type_of_location_visited, y = visits, fill = type_of_location_visited))
+```
+
+
+```{r}
+scot_loca %>%
+  filter(date_code == "2019" & type_of_location_visited != "All areas") %>%
+  group_by(type_of_location_visited) %>%
+  summarise(revenue = million_pounds_gbp) %>%
+  ggplot() +
+  scale_x_discrete(labels = c("City", "Rural", "Seaside - Beach", "Seaside - other", "Seaside - Resort", "Town", "Village")) +
+  theme(legend.position='none') +
+  ggtitle("Scottish Tourist Locations 2019") +
+   ylab("Revenue per Million") +
+  xlab("Type of Locations Visited") +
+   geom_col(aes(x = type_of_location_visited, y = revenue, fill = type_of_location_visited))
 ```
 
