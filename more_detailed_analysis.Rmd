@@ -128,16 +128,29 @@ plot(mod1a)
 
 ```{r}
 scot_demo %>%
-  select(- million_visits) %>%
+  filter(age != "All" | marital_status != "All" | gender != "All" | 
+           employment_status == "All" | children != "All" | 
+           access_to_car != "All" | social_grade != "All") %>%
+   select(-million_visits) %>%
   ggpairs()
 ```
 
 # Build a model 
 
 ```{r}
-mod2a <- lm(million_pounds_gbp ~ age + access_to_car + social_grade + employment_status, data = scot_demo)
+ model_set <- scot_demo %>% 
+     filter(age != "All") %>%
+  # filter(employment_status != "All") %>%
+  # filter(access_to_car != "All") %>%
+  #           filter(social_grade != "All") 
+   
+mod2a <- lm(million_pounds_gbp ~ age + access_to_car + social_grade + employment_status, model_set)
 mod2a
 ```
+
+
+
+
  # age + access_to_car + social_grade + 
     employment_status has a 0.73 predictor of 
 ```{r}
@@ -229,5 +242,24 @@ scot_loca %>%
    ylab("Revenue per Million") +
   xlab("Type of Locations Visited") +
    geom_col(aes(x = type_of_location_visited, y = revenue, fill = type_of_location_visited))
+```
+```{r}
+scot_loca %>%
+  ggplot() + 
+  ggtitle("Scottish Tourist Locations 2019") +
+   ylab("Visits per Million") +
+  xlab("Revenue per Million") +
+  geom_point(aes(x = million_pounds_gbp, y = million_visits, colour = date_code))
+```
+
+```{r}
+country_dom_tour <- dom_tour %>%
+  filter(feature_code == "S92000003")
+```
+
+
+```{r}
+scot_accom_raw_urban <- scot_accom_raw %>%
+  filter(Location == "Large Urban Areas")
 ```
 
