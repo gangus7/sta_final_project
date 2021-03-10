@@ -1,0 +1,223 @@
+---
+title: "Scottish Tourism Report"
+author: "Graham Angus"
+date: "10/03/2021"
+output: html_document
+---
+
+#Analysis of The Visit Scotland Dataset
+## By Graham Angus
+
+**Intro to the data**
+
+My final project is based on the Visit Scotland dataset which comprises 6 datasets 
+to answer the below questions and any more detailed ones. 
+
+• What kind of tourism activity generates the highest income for Scotland?
+• Which kind of activity generates the most visits to sites?
+• Is there a particular key demographic of visitors we should be focusing on? 
+Who spends the most? Who visits the most?
+• What type of locations receive the most visits? 
+What kinds of locations do people spend the most in?
+• Is there a particular method of travel our visitors arrive by? 
+Some of our locations are remote and not easily accessible by public transport, 
+so this would be good information to have.
+• When looking at regional tourism, what insights can we gain? 
+Where are our visitors from? How do they differ in the money they spend, 
+nights they spend in Scotland, or number of visits they do?
+• What type of accomodation is most popular? Is there a difference by location?
+• How have general tourism rates changed over time?
+• Is there any way to predict spending and visits for Visit Scotland?
+
+The datasets are made up from several different methods, the regional tourism one
+being Interviewing is carried out face-to-face every week of the year. 
+Annually, some 100,000 respondents are contacted, and any who have returned from 
+an overnight trip within the past four weeks are asked to describe the details of 
+that trip.
+
+The scottish accomodation data is taken from SAOS is a voluntary monthly survey 
+and participation of accommodation providers varies across type and time.
+This means that the survey only allows for occupancy rate data which can make 
+full analysis difficult. 
+
+The other 4 datasets are derived from The Great Britain Day Visits Survey started 
+in 2011 and was conducted using an online methodology. Over 35,000 interviews 
+are conducted with adults aged 16 and over resident in England, Wales and 
+Scotland during 52 weekly survey waves. This is an opt in online questionnaire 
+which can come with issues.
+
+**The Domestic Tourism datset**
+
+```{r}
+country_dom_tour %>%
+  filter(breakdown_of_domestic_tourism == "Visits") %>%
+  ggplot()+
+   theme(legend.position='none') +
+  ggtitle("Scottish Tourist Region of Residency 2019") +
+   ylab("Visits per Thousand") +
+  xlab("Year") +
+  geom_col(aes(x = date_code, y = value, fill = region_of_residence))
+```
+
+I was able to find out that domestic tourism rates have stayed largely flat over
+the period and the number from England and Scotland is relatively similar 
+especially when you take the differing populations into context. 
+
+
+
+**Scottish Accomodation dataset**
+
+This is probably the trickiest dataset as it is firstly based on % occupancy which 
+isn't a great way to gauge success as it doesn't tell you wether supply has 
+increased or decreased and likewise with demand. There are wild variances in the
+data which go against what would be expected and the sorting of the survey data 
+is to be one of my recommendations.
+
+
+**Scottish Activity Datset**
+
+This dataset gives us an insight into what activites tourists are coming to do in
+Scotland and also what they have done once here. The following graphs show a 300% 
+increase in revenue from personal events like weddings, a doubling of live sport
+revenue from tourists and a 25% increase in meals out revenue. Generally there is 
+an increase in all of leisure/sport type categories and no change in the Visitor 
+Attractions revenue. 
+
+```{r}
+scot_activ %>%
+  filter(date_code == "2013" & tourism_activity != "All") %>%
+  group_by(tourism_activity) %>%
+  summarise(revenue = million_pounds_gbp) %>%
+  ggplot() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  geom_col(aes(x = tourism_activity, y = revenue, fill = tourism_activity)) +
+   ggtitle("Scottish Tourist Activity Revenue 2013") +
+   ylab("Revenue per Million") +
+  xlab("Tourist Activities") +
+  theme(legend.position='none') +
+  scale_x_discrete(labels = c("Spa Day", "Day Trip", "Entertainment", "Exploring", "Leisure Activities", "Night Out", "Outdoor Leisure", "Shopping", "Personal Events", "Public Events", "Sport Participation", "Visiting friends or family", "Visitor Attraction", "Live Sport", "Out for a meal"))
+```
+
+```{r}
+scot_activ %>%
+  filter(date_code == "2019" & tourism_activity != "All") %>%
+  group_by(tourism_activity) %>%
+  summarise(revenue = million_pounds_gbp) %>%
+  ggplot() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  geom_col(aes(x = tourism_activity, y = revenue, fill = tourism_activity)) +
+   ggtitle("Scottish Tourist Activity Revenue 2019") +
+   ylab("Revenue per Million") +
+  xlab("Tourist Activities") +
+  theme(legend.position='none') +
+  scale_x_discrete(labels = c("Spa Day", "Day Trip", "Entertainment", "Exploring", "Leisure Activities", "Night Out", "Outdoor Leisure", "Shopping", "Personal Events", "Public Events", "Sport Participation", "Visiting friends or family", "Visitor Attraction", "Live Sport", "Out for a meal"))
+```
+
+
+
+
+**Scottish Demographic datset**
+
+This dataset gives us insight into age, marital status, social class, gender, 
+employment status, access to car and children. It is another difficult dataset 
+to wrangle or even model as each column has an all value which encompasses 
+every cateogry in the variable so stops further analysis but I was able to split
+and find variations in age brackets and average spend and the change over the years.
+
+```{r}
+scot_demo %>%
+  filter(age != "All" & date_code == "2019") %>%
+   group_by(age) %>%
+   summarise(avg_spend = million_pounds_gbp/million_visits)
+```
+
+
+```{r}
+scot_demo %>%
+  filter(age != "All" & date_code == "2013") %>%
+   group_by(age) %>%
+   summarise(avg_spend = million_pounds_gbp/million_visits)
+```
+
+
+**Scottish Location dataset**
+
+This dataset looks at the location tourists visit whilst in Scotland for day 
+activities, I feel this may skew the data as I feel people may be more likely to
+visit bigger towns and cities for activities even if they are staying outside of 
+them. The graph below looks at revenue and visits over time and you can see Cities 
+has increased over time where villages and more rural locations have stayed 
+broadly static. 
+
+```{r}
+scot_loca %>%
+  ggplot() + 
+  ggtitle("Scottish Tourist Locations 2019") +
+   ylab("Visits per Million") +
+  xlab("Revenue per Million") +
+  geom_point(aes(x = million_pounds_gbp, y = million_visits, colour = date_code))
+```
+
+
+
+**Scottish Transport dataset**
+
+This dataset shows the type of transport used by tourists whilst here, there are 
+numerous findings which don't make intuative sense and need further explanation
+Some of the findings for example show 
+Bus journeys have stayed at same level but income has dropped by ⅓
+Internal Flights 0.2m to 1.3m
+Bike 1.5m to 1.2m visits but income £3.4m to £15.5m
+Ferry 0.8m to 0.5m visits but income £12.2m to £27.7m
+Campervan usage static but income £5.1m to £24.4m
+
+
+
+```{r}
+scot_tran %>%
+  filter(date_code == "2013" & method_of_travel != "All" & method_of_travel != "Car - own/friends/family" & method_of_travel != "Motor cycle"
+          & method_of_travel != "Bus or Coach - Minibus") %>%
+  group_by(method_of_travel) %>%
+  summarise(revenue = million_pounds_gbp) %>%
+  ggplot() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+   geom_col(aes(x = method_of_travel, y = revenue, fill = method_of_travel)) +
+    ggtitle("Scottish Transport Methods 2013") +
+  ylab("Revenue £m") +
+  xlab("Method of Travel") +
+    scale_y_continuous(breaks = c(200, 400, 600, 800)) +
+  theme(legend.position='none') +
+  scale_x_discrete(labels = c("Bike", "Boat/Ship/Ferry", "Organised Tour", "Regular Bus", "Car Hired", "Caravan/Campervan", "Lorry/Truck/Van", "Other", "Plane", "Taxi", "Train", "Tram", "Tube", "Walked")) 
+```
+
+
+
+
+```{r}
+scot_tran %>%
+  filter(date_code == "2019" & method_of_travel != "All" & method_of_travel != "Car - own/friends/family") %>%
+  group_by(method_of_travel) %>%
+  summarise(revenue = million_pounds_gbp) %>%
+  ggplot() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+   geom_col(aes(x = method_of_travel, y = revenue, fill = method_of_travel)) +
+    ggtitle("Scottish Transport Methods 2019") +
+   ylab("Revenue £m") +
+  xlab("Method of Travel") +
+  scale_y_continuous(breaks = c(200, 400, 600, 800)) +
+  theme(legend.position='none') +
+  scale_x_discrete(labels = c("Bike", "Boat/Ship/Ferry", "Organised Tour", "Regular Bus", "Car Hired", "Caravan/Campervan", "Lorry/Truck/Van", "Other", "Plane", "Taxi", "Train", "Tram", "Tube", "Walked"))
+```
+
+
+
+**Conclusions**
+
+Data is never going to be perfect but these particular sets don't allow for 
+further analysis and to asnwer questions about wether there is higher demand and 
+supply for accomodation, for further exploration into demographics which could 
+help with marketing targeting and also service provision. It seems like tourism 
+revenue has increased over the period and some metrics like campervans anecdotally 
+do seem to more prominent in Scotland which can often come with problems, in this
+specific case a plan on how to house and accomodate campervans within our 
+infrastructure is much needed and would possibly help those affected by them.
