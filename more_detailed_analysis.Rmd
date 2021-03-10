@@ -8,6 +8,7 @@ scot_activ %>%
    filter(tourism_activity == "All") %>%
   ggplot() +
 geom_col(aes(x= date_code, y = million_pounds_gbp, fill = date_code)) +
+  labs(fill = "Year") +
   labs(
     x = "Year",
     y = "Million Pounds Revenue",
@@ -19,10 +20,14 @@ geom_col(aes(x= date_code, y = million_pounds_gbp, fill = date_code)) +
 # Looking at change in accomodation rates
 
 ```{r}
-scot_accom %>%
-  filter(location != "All") %>%
+scot_accom_raw %>%
+  filter(location == "All") %>%
   ggplot() +
-  geom_col(aes(x = date_code, y = value, fill = location))
+   ggtitle("Scottish Transport Methods 2019") +
+  ylab("Visits/Million") +
+  xlab("Method of Travel") +
+  theme(legend.position='none') +
+  geom_col(aes(x = date_code, y = value, fill = accommodation_type_and_occupancy))
 ```
 
 # Looking at transport types 
@@ -39,6 +44,7 @@ scot_tran %>%
   ylab("Visits/Million") +
   xlab("Method of Travel") +
   scale_y_continuous(breaks = c(5, 10, 15, 20)) +
+  theme(legend.position='none') +
   scale_x_discrete(labels = c("Bike", "Boat/Ship/Ferry", "Organised Tour", "Regular Bus", "Car Hired", "Caravan/Campervan", "Lorry/Truck/Van", "Other", "Plane", "Taxi", "Train", "Tram", "Tube", "Walked"))
 ```
 
@@ -55,6 +61,7 @@ scot_tran %>%
   ylab("Visits/Million") +
   xlab("Method of Travel") +
   scale_y_continuous(breaks = c(5, 10, 15, 20)) +
+  theme(legend.position='none') +
   scale_x_discrete(labels = c("Bike", "Boat/Ship/Ferry", "Organised Tour", "Regular Bus", "Car Hired", "Caravan/Campervan", "Lorry/Truck/Van", "Other", "Plane", "Taxi", "Train", "Tram", "Tube", "Walked")) 
 ```
 
@@ -93,7 +100,7 @@ scot_tran %>%
 ```
 ```{r}
 scot_tran %>%
-  filter(date_code == "2013")
+  filter(date_code == "2019")
 ```
  # Model building
  
@@ -202,13 +209,13 @@ scot_activ %>%
 
 ```{r}
 scot_activ %>%
-  filter(date_code == "2019" & tourism_activity != "All") %>%
+  filter(date_code == "2013" & tourism_activity != "All") %>%
   group_by(tourism_activity) %>%
   summarise(revenue = million_pounds_gbp) %>%
   ggplot() +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
   geom_col(aes(x = tourism_activity, y = revenue, fill = tourism_activity)) +
-   ggtitle("Scottish Tourist Activity Revenue 2019") +
+   ggtitle("Scottish Tourist Activity Revenue 2013") +
    ylab("Revenue per Million") +
   xlab("Tourist Activities") +
   theme(legend.position='none') +
@@ -245,11 +252,13 @@ scot_loca %>%
 ```
 ```{r}
 scot_loca %>%
+  filter(type_of_location_visited != "All areas") %>%
   ggplot() + 
   ggtitle("Scottish Tourist Locations 2019") +
    ylab("Visits per Million") +
   xlab("Revenue per Million") +
-  geom_point(aes(x = million_pounds_gbp, y = million_visits, colour = date_code))
+  labs(col = "Year", shape = "Location›") +
+  geom_point(aes(x = million_pounds_gbp, y = million_visits, colour = date_code, shape = type_of_location_visited))
 ```
 
 ```{r}
@@ -261,5 +270,78 @@ country_dom_tour <- dom_tour %>%
 ```{r}
 scot_accom_raw_urban <- scot_accom_raw %>%
   filter(Location == "Large Urban Areas")
+```
+
+
+```{r}
+scot_demo %>%
+  filter(age != "All" & date_code == "2019") %>%
+   group_by(age) %>%
+   summarise(avg_spend = million_pounds_gbp/million_visits)
+  # arrange(desc(million_pounds_gbp))
+```
+
+```{r}
+country_dom_tour %>%
+  filter(breakdown_of_domestic_tourism == "Visits" & date_code != "2009-2011" & date_code != "2010-2012"
+         & region_of_residence != "All of GB") %>%
+  ggplot()+
+  ggtitle("Scottish Tourist Region of Residency 2019") +
+   ylab("Visits per Thousand") +
+  xlab("Year") +
+  labs(fill = "Region of Residence") +
+    scale_x_discrete(labels = c("2013", "2014", "2015", "2016", "2017", "2018", "2019")) +
+  geom_col(aes(x = date_code, y = value, fill = region_of_residence))
+```
+
+```{r}
+country_dom_tour %>%
+  filter(date_code == "2017-2019" & breakdown_of_domestic_tourism == "Expenditure") %>%
+  group_by(region_of_residence) %>%
+    summarise(value)
+```
+
+
+
+```{r}
+scot_accom_raw %>%
+  filter(date_code == "2019" & location == "Large Urban Areas") %>%
+  group_by(accommodation_type_and_occupancy) %>%
+  summarise(occupancy = value) %>%
+  radarchart::chartJSRadar() 
+  
+  
+  
+```
+
+```{r}
+library(radarchart)
+library(fmsb)
+```
+
+```{r}
+scot_accom_raw %>%
+  filter(date_code == "2019" & location == "Remote Rural") %>%
+  group_by(accommodation_type_and_occupancy) %>%
+  summarise(occupancy = value) %>%
+  radarchart::chartJSRadar() 
+```
+
+
+
+```{r}
+scot_accom_raw %>%
+  filter(date_code == "2013" & location == "Large Urban Areas") %>%
+  group_by(accommodation_type_and_occupancy) %>%
+  summarise(occupancy = value) %>%
+  radarchart::chartJSRadar() 
+```
+
+```{r}
+scot_accom_raw %>%
+  filter(date_code == "2013" & location == "Remote Rural") %>%
+  group_by(accommodation_type_and_occupancy) %>%
+  summarise(occupancy = value) %>%
+  radarchart::chartJSRadar() 
 ```
 

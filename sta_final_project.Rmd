@@ -19,7 +19,7 @@ scot_tran <- read_csv("data/tourism_day_visits_transport.csv")
 dom_tour <- dom_tour %>%
   clean_names()
 
-scot_accom <- scot_accom %>%
+scot_accom_raw <- scot_accom_raw %>%
   clean_names()
 
 scot_activ <- scot_activ %>%
