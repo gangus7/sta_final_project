@@ -22,7 +22,7 @@ dom_tour <- dom_tour %>%
 scot_accom_raw <- scot_accom_raw %>%
   clean_names()
 
-scot_activ <- scot_activ %>%
+scot_activ_raw <- scot_activ_raw %>%
   clean_names()
 
 scot_demo <- scot_demo %>%

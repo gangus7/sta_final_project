@@ -305,10 +305,11 @@ country_dom_tour %>%
 
 ```{r}
 scot_accom_raw %>%
-  filter(date_code == "2019" & location == "Large Urban Areas") %>%
+  filter(date_code == "2019" & location == "Large Urban Areas"& accommodation_type_and_occupancy != "Hotels - Bed Occupancy"
+         & accommodation_type_and_occupancy != "Hostels - Bed Occupancy" & accommodation_type_and_occupancy != "Guest House/B&B - Bed Occupancy") %>%
   group_by(accommodation_type_and_occupancy) %>%
   summarise(occupancy = value) %>%
-  radarchart::chartJSRadar() 
+  radarchart::chartJSRadar(labs = c("Caravan/Camping", "B&B", "Hotels", "Self Catering"))
   
   
   
@@ -321,27 +322,50 @@ library(fmsb)
 
 ```{r}
 scot_accom_raw %>%
-  filter(date_code == "2019" & location == "Remote Rural") %>%
+  filter(date_code == "2019" & location == "Remote Rural"& accommodation_type_and_occupancy != "Hotels - Bed Occupancy"
+         & accommodation_type_and_occupancy != "Hostels - Bed Occupancy" & accommodation_type_and_occupancy != "Guest House/B&B - Bed Occupancy") %>%
   group_by(accommodation_type_and_occupancy) %>%
   summarise(occupancy = value) %>%
-  radarchart::chartJSRadar() 
+  radarchart::chartJSRadar(labs = c("Caravan/Camping", "B&B", "Hotels", "Self Catering"))
+
 ```
 
 
 
 ```{r}
 scot_accom_raw %>%
-  filter(date_code == "2013" & location == "Large Urban Areas") %>%
+  filter(date_code == "2013" & location == "Large Urban Areas"& accommodation_type_and_occupancy != "Hotels - Bed Occupancy"
+         & accommodation_type_and_occupancy != "Hostels - Bed Occupancy" & accommodation_type_and_occupancy != "Guest House/B&B - Bed Occupancy") %>%
   group_by(accommodation_type_and_occupancy) %>%
   summarise(occupancy = value) %>%
-  radarchart::chartJSRadar() 
+  radarchart::chartJSRadar(labs = c("Caravan/Camping", "B&B", "Hotels", "Self Catering"))
 ```
 
 ```{r}
 scot_accom_raw %>%
-  filter(date_code == "2013" & location == "Remote Rural") %>%
+  filter(date_code == "2013" & location == "Remote Rural" & accommodation_type_and_occupancy != "Hotels - Bed Occupancy"
+         & accommodation_type_and_occupancy != "Hostels - Bed Occupancy" & accommodation_type_and_occupancy != "Guest House/B&B - Bed Occupancy") %>%
   group_by(accommodation_type_and_occupancy) %>%
   summarise(occupancy = value) %>%
-  radarchart::chartJSRadar() 
+  radarchart::chartJSRadar(labs = c("Caravan/Camping", "B&B", "Hotels", "Self Catering"))
+
+```
+
+
+
+```{r}
+scot_activ_raw %>%
+   filter(units == "Million Visits" & tourism_activity != "All") %>%
+  # group_by(tourism_activity) %>%
+  # summarise(revenue = million_pounds_gbp) %>%
+  ggplot() +
+  # theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  geom_line(aes(x = date_code, y = value, colour = tourism_activity)) +
+  geom_point(aes(x = date_code, y = value, colour = tourism_activity)) +
+   ggtitle("Scottish Tourist Activity Visits") +
+   ylab("Visits per Million") +
+  xlab("Year") +
+  labs(colour = "Tourist Activity") +
+  scale_colour_discrete(labels = c("Spa Day", "Day Trip", "Entertainment", "Exploring", "Leisure Activities", "Night Out", "Outdoor Leisure", "Shopping", "Personal Events", "Public Events", "Sport Participation", "Visiting friends or family", "Visitor Attraction", "Live Sport", "Out for a meal"))
 ```
 
